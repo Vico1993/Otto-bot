@@ -9,7 +9,7 @@ func TypeCheck(next tele.HandlerFunc) tele.HandlerFunc {
 	return func(c tele.Context) error {
 
 		// Check if in Group
-		if c.Chat().Type != tele.ChatSuperGroup && c.Chat().Type != tele.ChatGroup {
+		if !isGroupChat(*c.Chat()) {
 			return c.Send("Sorry can't talk here! We need to be in a group!")
 		}
 
@@ -17,4 +17,9 @@ func TypeCheck(next tele.HandlerFunc) tele.HandlerFunc {
 
 		return next(c)
 	}
+}
+
+// Check if the chat is in a correct group
+func isGroupChat(c tele.Chat) bool {
+	return c.Type == tele.ChatSuperGroup || c.Type == tele.ChatGroup
 }
