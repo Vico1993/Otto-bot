@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/Vico1993/Otto-bot/internal/handles"
+	"github.com/Vico1993/Otto-bot/internal/middleware"
 	"github.com/subosito/gotenv"
 	tele "gopkg.in/telebot.v3"
 )
@@ -25,8 +27,14 @@ func main() {
 		return
 	}
 
+	// Middleware
+	b.Use(middleware.TypeCheck)
+
 	// Handles
 	b.Handle("/hello", handles.Hello)
+	b.Handle("/init", handles.Init)
+
+	fmt.Println("Ready to Go!...")
 
 	b.Start()
 }
