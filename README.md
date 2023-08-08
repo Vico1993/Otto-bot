@@ -13,7 +13,43 @@ This part of the code only contains the bot flow
 
 ## Getting Started
 
-TBD
+### Prerequisites
+
+Make sure you have the following tools installed on your machine:
+
+-   Go (at least version 1.20)
+-   A valid Telegram bot:
+    -   look at the great [bot father](https://core.telegram.org/bots)
+-   Setup an `.env` file
+
+```sh
+# Bot token given by the @BotFather
+TELEGRAM_BOT_TOKEN=<TELEGRAM_BOT>
+```
+
+## Installing
+
+To install Otto, run the following command:
+
+```sh
+make ensure_deps
+```
+
+## Running Tests
+
+To run tests, use the following command:
+
+```sh
+make test
+```
+
+## Running Lint
+
+To run lint, use the following command:
+
+```sh
+make lint
+```
 
 ## TIPS
 
