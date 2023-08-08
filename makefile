@@ -1,4 +1,4 @@
-.PHONY: ensure_deps build test lint
+.PHONY: ensure_deps build test lint watch
 
 default: test lint
 
@@ -24,3 +24,7 @@ lint_fix:
 	@ echo "🪛  Start linting with Fix 🪛"
 	@ golangci-lint run --fix  ./...
 	@ echo "🪛  Fixed your lint 🪛"
+
+watch:
+	@ echo "👀  Continue working... I'm watching 👀"
+	@ gow -c run ./internal
