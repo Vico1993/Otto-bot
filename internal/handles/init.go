@@ -5,7 +5,5 @@ import (
 )
 
 func Init(c tele.Context) error {
-	// c.Chat().ID
-
 	return c.Send("initialisation...")
 }

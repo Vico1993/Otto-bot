@@ -8,6 +8,7 @@ import (
 
 	"github.com/Vico1993/Otto-bot/internal/handles"
 	"github.com/Vico1993/Otto-bot/internal/middleware"
+	"github.com/Vico1993/Otto-bot/internal/model"
 	"github.com/subosito/gotenv"
 	tele "gopkg.in/telebot.v3"
 )
@@ -26,6 +27,9 @@ func main() {
 		log.Fatal(err)
 		return
 	}
+
+	// Model initialisation
+	model.Init()
 
 	// Middleware
 	b.Use(middleware.TypeCheck)
