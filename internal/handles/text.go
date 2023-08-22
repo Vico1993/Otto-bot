@@ -17,7 +17,7 @@ func OnText(c tele.Context) error {
 		switch chatProgress.InProgress {
 		case "init":
 			fmt.Println("Found chat id working on init")
-			Init(c)
+			_ = Init(c)
 		default:
 			fmt.Println("Found chat in progress for something weird... got to remove")
 			fmt.Println("Got " + chatProgress.InProgress)

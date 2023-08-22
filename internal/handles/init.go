@@ -57,13 +57,13 @@ func Init(c tele.Context) error {
 }
 
 func initStep1(c tele.Context) {
-	c.Send("Welcome to first step")
+	_ = c.Send("Welcome to first step")
 }
 
 func initStep2(c tele.Context) {
-	c.Send("Welcome to second step")
+	_ = c.Send("Welcome to second step")
 }
 
 func initStep3(c tele.Context) {
-	c.Send("Welcome to last step")
+	_ = c.Send("Welcome to last step")
 }
