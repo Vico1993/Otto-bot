@@ -13,7 +13,7 @@ func TestIsChatIdInProgressWithChatId(t *testing.T) {
 	var chatIdToTest int64 = 12341
 	ListOfChats[chatIdToTest] = *NewChat(chatIdToTest, 1, 2, "")
 
-	assert.True(t, isChatIdInProgress(chatIdToTest), "Chat id should be present and valid")
+	assert.True(t, IsChatIdInProgress(chatIdToTest), "Chat id should be present and valid")
 }
 
 func TestIsChatIdInProgressWithoutChatId(t *testing.T) {
@@ -23,7 +23,7 @@ func TestIsChatIdInProgressWithoutChatId(t *testing.T) {
 	var chatIdToTest int64 = 12341
 	ListOfChats[chatIdToTest] = *NewChat(chatIdToTest, 1, 2, "")
 
-	assert.False(t, isChatIdInProgress(12342), "Chat id requested should not be present")
+	assert.False(t, IsChatIdInProgress(12342), "Chat id requested should not be present")
 
 }
 
@@ -56,4 +56,17 @@ func TestUpsertChatToListEdit(t *testing.T) {
 		},
 		"Chat should equal the result",
 	)
+}
+
+func TestDeleteChatFromList(t *testing.T) {
+	// Reset list
+	ListOfChats = make(map[int64]Chat)
+	var chatIdToTest int64 = 12341
+	ListOfChats[chatIdToTest] = *NewChat(chatIdToTest, 1, 2, "")
+
+	assert.Len(t, ListOfChats, 1, "List of chats should contain 1 chat")
+
+	DeleteChatFromList(chatIdToTest)
+
+	assert.Len(t, ListOfChats, 0, "List of chats should be empty now")
 }
