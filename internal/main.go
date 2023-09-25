@@ -37,6 +37,7 @@ func main() {
 	// Handles
 	b.Handle("/hello", handles.Hello)
 	b.Handle("/init", handles.Init)
+	b.Handle("/ping", handles.Ping)
 	b.Handle(tele.OnText, handles.OnText)
 
 	fmt.Println("Ready to Go!...")
