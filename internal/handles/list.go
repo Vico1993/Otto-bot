@@ -12,7 +12,7 @@ func List(c tele.Context) error {
 	feedsUrl := retrieveFeedsUrl(strconv.FormatInt(c.Chat().ID, 10))
 	if len(feedsUrl) == 0 {
 		fmt.Println(c.Chat().ID)
-		c.Reply("No feed attached to this chat id")
+		return c.Reply("No feed attached to this chat id")
 	}
 
 	reply := buildListReply(feedsUrl)

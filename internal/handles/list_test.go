@@ -8,7 +8,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// func TestBuildListReply() {}
+func TestBuildListReply(t *testing.T) {
+	res := buildListReply([]string{"https://google.com", "https://twitter.com"})
+
+	assert.Equal(t, "\n1. https://google.com\n2. https://twitter.com", res, "Result should match expectation")
+}
 
 func TestRetrieveFeedsUrlWithNoData(t *testing.T) {
 	chatId := "1234"
@@ -37,5 +41,5 @@ func TestRetrieveFeedsUrlData(t *testing.T) {
 	res := retrieveFeedsUrl(chat.ChatId)
 
 	assert.Len(t, res, 1, "Result of retrieveFeedsUrl should be 1 as repository return 1 chat")
-	assert.Equal(t, res, []string{"https://google.com"})
+	assert.Equal(t, []string{"https://google.com"}, res, "Only the google.com url should be return")
 }
