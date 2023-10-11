@@ -7,8 +7,6 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
-var ottoService = service.NewOttoService()
-
 // Manage the `/start`
 func Start(c tele.Context) error {
 	chat := ottoService.InitChat(strconv.FormatInt(c.Chat().ID, 10), c.Chat().Username, []string{"created"})

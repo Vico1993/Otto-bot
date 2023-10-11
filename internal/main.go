@@ -34,6 +34,7 @@ func main() {
 	b.Handle("/hello", handles.Hello)
 	b.Handle("/ping", handles.Ping)
 	b.Handle("/start", handles.Start)
+	b.Handle("/list", handles.List)
 
 	fmt.Println("Ready to Go!...")
 
