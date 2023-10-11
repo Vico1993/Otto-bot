@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/stretchr/testify/mock"
@@ -24,8 +25,13 @@ type ChatResponse struct {
 	Chat Chat `json:"chat"`
 }
 
+type ChatFeedsResponse struct {
+	Feeds []string `json:"feeds"`
+}
+
 type IOttoService interface {
 	InitChat(chatId string, userId string, tags []string) *Chat
+	ListFeeds(chatId string) []string
 }
 
 type OttoService struct {
@@ -53,7 +59,12 @@ func (s *OttoService) InitChat(chatId string, userId string, tags []string) *Cha
 		bytes.NewBuffer(data),
 	)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error requesting new chats: " + err.Error())
+		return nil
+	}
+
+	if response.StatusCode != http.StatusOK {
+		fmt.Println("Api respond with status code: " + strconv.Itoa(response.StatusCode))
 		return nil
 	}
 
@@ -62,6 +73,28 @@ func (s *OttoService) InitChat(chatId string, userId string, tags []string) *Cha
 	_ = json.Unmarshal(body, &res)
 
 	return &res.Chat
+}
+
+// Retrieve all feeds attached to a chatId
+func (s *OttoService) ListFeeds(chatId string) []string {
+	response, err := http.Get(
+		os.Getenv("OTTO_API_URL") + "/chats/" + chatId + "/feeds",
+	)
+	if err != nil {
+		fmt.Println("Error requesting chats feeds: " + err.Error())
+		return nil
+	}
+
+	if response.StatusCode != http.StatusOK {
+		fmt.Println("Api respond with status code: " + strconv.Itoa(response.StatusCode))
+		return nil
+	}
+
+	body, _ := io.ReadAll(response.Body)
+	var res ChatFeedsResponse
+	_ = json.Unmarshal(body, &res)
+
+	return res.Feeds
 }
 
 type MocksOttoService struct {
