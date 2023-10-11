@@ -11,11 +11,14 @@ var ottoService = service.NewOttoService()
 
 func Start(c tele.Context) error {
 	chat := ottoService.InitChat(strconv.FormatInt(c.Chat().ID, 10), c.Chat().Username, []string{"created"})
-	if chat != nil {
-		chats[chat.Id] = chat
+	if chat == nil {
+		_ = c.Reply("Something happns")
+
+		return nil
 	}
 
-	c.Reply("You are initiated, thank you")
+	chats[chat.Id] = chat
+	_ = c.Reply("You are initiated, thank you")
 
 	return nil
 }
