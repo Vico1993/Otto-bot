@@ -34,7 +34,13 @@ func main() {
 	b.Handle("/hello", handles.Hello)
 	b.Handle("/ping", handles.Ping)
 	b.Handle("/start", handles.Start)
-	b.Handle("/list", handles.List)
+
+	// Feeds
+	b.Handle("/feeds", handles.ListFeeds)
+
+	// Tags
+	b.Handle("/tags", handles.TagsList)
+	b.Handle("/tagsdelete", handles.TagsDelete)
 
 	fmt.Println("Ready to Go!...")
 
