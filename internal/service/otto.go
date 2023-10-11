@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/stretchr/testify/mock"
@@ -53,7 +54,12 @@ func (s *OttoService) InitChat(chatId string, userId string, tags []string) *Cha
 		bytes.NewBuffer(data),
 	)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Error requesting new chats: " + err.Error())
+		return nil
+	}
+
+	if response.StatusCode != http.StatusOK {
+		fmt.Println("Api respond with status code: " + strconv.Itoa(response.StatusCode))
 		return nil
 	}
 
