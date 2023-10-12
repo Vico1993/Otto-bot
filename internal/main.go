@@ -40,6 +40,7 @@ func main() {
 
 	// Tags
 	b.Handle("/tags", handles.TagsList)
+	b.Handle("/tagsadd", handles.TagsAdd)
 	b.Handle("/tagsdelete", handles.TagsDelete)
 
 	fmt.Println("Ready to Go!...")
