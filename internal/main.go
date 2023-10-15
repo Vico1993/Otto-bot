@@ -37,11 +37,15 @@ func main() {
 
 	// Feeds
 	b.Handle("/feeds", handles.ListFeeds)
+	b.Handle("/feedsdisabled", handles.DisableFeeds)
 
 	// Tags
 	b.Handle("/tags", handles.TagsList)
 	b.Handle("/tagsadd", handles.TagsAdd)
 	b.Handle("/tagsdelete", handles.TagsDelete)
+
+	// onCallback
+	b.Handle(tele.OnCallback, handles.OnCallback)
 
 	fmt.Println("Ready to Go!...")
 

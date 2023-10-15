@@ -27,20 +27,30 @@ type ChatResponse struct {
 	Chat Chat `json:"chat"`
 }
 
+type Feeds struct {
+	Id  string `json:"id"`
+	Url string `json:"url"`
+}
+
 type ChatFeedsResponse struct {
-	Feeds []string `json:"feeds"`
+	Feeds []Feeds `json:"feeds"`
 }
 
 type ChatTagsResponse struct {
 	Tags []string `json:"tags"`
 }
 
+type ChatDeleteFeedResponse struct {
+	Deleted bool `json:"deleted"`
+}
+
 type IOttoService interface {
 	InitChat(chatId string, userId string, tags []string) *Chat
-	ListFeeds(chatId string) []string
+	ListFeeds(chatId string) []Feeds
 	ListTags(chatId string) []string
 	DeleteTag(chatId string, tag string) bool
 	AddTags(chatId string, tags []string) []string
+	DisableFeeds(chatId string, feedId string) bool
 }
 
 type OttoService struct {
@@ -85,7 +95,7 @@ func (s *OttoService) InitChat(chatId string, userId string, tags []string) *Cha
 }
 
 // Retrieve all feeds attached to a chatId
-func (s *OttoService) ListFeeds(chatId string) []string {
+func (s *OttoService) ListFeeds(chatId string) []Feeds {
 	response, err := http.Get(
 		os.Getenv("OTTO_API_URL") + "/chats/" + chatId + "/feeds",
 	)
@@ -182,6 +192,32 @@ func (s *OttoService) DeleteTag(chatId string, tag string) bool {
 	_ = json.Unmarshal(body, &res)
 
 	return !utils.InSlice(tag, res.Tags)
+}
+
+func (s *OttoService) DisableFeeds(chatId string, feedId string) bool {
+	// Create client
+	client := &http.Client{}
+
+	// Create request
+	req, err := http.NewRequest("DELETE", os.Getenv("OTTO_API_URL")+"/chats/"+chatId+"/feeds/"+feedId, nil)
+	if err != nil {
+		fmt.Println("Error creating the request to delete the feed: " + err.Error())
+		return false
+	}
+
+	// Fetch Request
+	response, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error making the request deleting the feed: " + err.Error())
+		return false
+	}
+	defer response.Body.Close()
+
+	body, _ := io.ReadAll(response.Body)
+	var res ChatDeleteFeedResponse
+	_ = json.Unmarshal(body, &res)
+
+	return res.Deleted
 }
 
 type MocksOttoService struct {
