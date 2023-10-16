@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/Vico1993/Otto-bot/internal/utils"
-	"github.com/stretchr/testify/mock"
 )
 
 type Chat struct {
@@ -21,6 +20,19 @@ type Chat struct {
 	TelegramUserId string     `json:"TelegramUserId"`
 	Tags           string     `json:"Tags"`
 	LastTimeParsed *time.Time `json:"LastTimeParsed"`
+}
+
+type Feed struct {
+	Id  string `json:"id"`
+	Url string `json:"url"`
+}
+
+type FeedResponse struct {
+	Feed Feed `json:"feed"`
+}
+
+type ChatFeedLinkResponse struct {
+	Added bool `json:"added"`
 }
 
 type ChatResponse struct {
@@ -48,6 +60,8 @@ type IOttoService interface {
 	InitChat(chatId string, userId string, tags []string) *Chat
 	ListFeeds(chatId string) []Feeds
 	ListTags(chatId string) []string
+	AddFeed(feedUrl string) *Feed
+	LinkFeedToChat(chatId string, feedId string) bool
 	DeleteTag(chatId string, tag string) bool
 	AddTags(chatId string, tags []string) []string
 	DisableFeeds(chatId string, feedId string) bool
@@ -220,6 +234,55 @@ func (s *OttoService) DisableFeeds(chatId string, feedId string) bool {
 	return res.Deleted
 }
 
-type MocksOttoService struct {
-	mock.Mock
+// Add feed to the chat
+func (s *OttoService) AddFeed(feedUrl string) *Feed {
+	data := []byte(`{
+		"url": "` + feedUrl + `"
+	}`)
+
+	response, err := http.Post(
+		os.Getenv("OTTO_API_URL")+"/feeds",
+		"application/json",
+		bytes.NewBuffer(data),
+	)
+	if err != nil {
+		fmt.Println("Error requesting new feed: " + err.Error())
+		return nil
+	}
+
+	if response.StatusCode != http.StatusOK {
+		fmt.Println("Api respond with status code: " + strconv.Itoa(response.StatusCode))
+		return nil
+	}
+
+	body, _ := io.ReadAll(response.Body)
+	var res FeedResponse
+	_ = json.Unmarshal(body, &res)
+
+	return &res.Feed
+}
+
+// link feed to the current chat
+func (s *OttoService) LinkFeedToChat(chatId string, feedId string) bool {
+	response, err := http.Post(
+		os.Getenv("OTTO_API_URL")+"/chats/"+chatId+"/feeds/"+feedId,
+		"application/json",
+		bytes.NewBuffer([]byte{}),
+	)
+
+	if err != nil {
+		fmt.Println("Error linking chat and feed: " + err.Error())
+		return false
+	}
+
+	if response.StatusCode != http.StatusOK {
+		fmt.Println("Api respond with status code: " + strconv.Itoa(response.StatusCode))
+		return false
+	}
+
+	body, _ := io.ReadAll(response.Body)
+	var res ChatFeedLinkResponse
+	_ = json.Unmarshal(body, &res)
+
+	return res.Added
 }

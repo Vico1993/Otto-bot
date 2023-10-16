@@ -37,6 +37,7 @@ func main() {
 
 	// Feeds
 	b.Handle("/feeds", handles.ListFeeds)
+	b.Handle("/feedsadd", handles.AddFeeds)
 	b.Handle("/feedsdisabled", handles.DisableFeeds)
 
 	// Tags
