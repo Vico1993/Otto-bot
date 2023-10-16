@@ -1,7 +1,6 @@
 package handles
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -23,24 +22,30 @@ func TagsList(c tele.Context) error {
 }
 
 func TagsDelete(c tele.Context) error {
-	tagsToDelete := buildTagListFromPayload(c.Message().Payload)
-
-	deleted := []string{}
-	for _, tag := range tagsToDelete {
-		tag := tag
-		done := ottoService.DeleteTag(strconv.FormatInt(c.Chat().ID, 10), strings.TrimSpace(tag))
-
-		if done {
-			deleted = append(deleted, tag)
-		}
+	tags := ottoService.ListTags(strconv.FormatInt(c.Chat().ID, 10))
+	if len(tags) == 0 {
+		return c.Reply("Thank you for your input, but it appears this chat doesn't watch for any tags. Add some!!!")
 	}
 
-	if len(deleted) != len(tagsToDelete) {
-		fmt.Println("Some tags where not deleted")
-		return c.Reply(service.ReturnError())
+	keyboard := make([][]tele.InlineButton, len(tags))
+
+	for _, tag := range tags {
+		keyboard = append(keyboard, []tele.InlineButton{
+			{
+				Text: tag,
+				Data: "deleteTags_" + tag,
+			},
+		})
 	}
 
-	return c.Reply("Great news! We've successfully deleted " + strconv.Itoa(len(deleted)) + " tags as requested")
+	return c.Send("Please select the tag you want to delete", &tele.ReplyMarkup{
+		RemoveKeyboard: true,
+		InlineKeyboard: keyboard,
+	})
+}
+
+func deleteTag(chatId string, tag string) bool {
+	return ottoService.DeleteTag(chatId, tag)
 }
 
 func TagsAdd(c tele.Context) error {
