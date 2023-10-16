@@ -21,7 +21,11 @@ func OnCallback(c tele.Context) error {
 
 	if cmd == "disableFeeds" {
 		disableFeedsCallBack(strconv.FormatInt(c.Chat().ID, 10), callback[1])
+		return c.Send("Feed has been disabled")
+	} else if cmd == "deleteTags" {
+		deleteTag(strconv.FormatInt(c.Chat().ID, 10), callback[1])
+		return c.Send("Tag has been deleted")
 	}
 
-	return c.Send("Feed has been disabled")
+	return nil
 }
