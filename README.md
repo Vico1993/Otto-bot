@@ -25,6 +25,9 @@ Make sure you have the following tools installed on your machine:
 ```sh
 # Bot token given by the @BotFather
 TELEGRAM_BOT_TOKEN=<TELEGRAM_BOT>
+
+# OTTO api url to connect the bot with its api
+OTTO_API_URL=<OTTO_API_URL>
 ```
 
 ## Installing
