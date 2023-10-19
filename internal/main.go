@@ -8,9 +8,24 @@ import (
 
 	"github.com/Vico1993/Otto-bot/internal/handles"
 	"github.com/Vico1993/Otto-bot/internal/middleware"
+	"github.com/Vico1993/Otto-bot/internal/utils"
 	"github.com/subosito/gotenv"
 	tele "gopkg.in/telebot.v3"
 )
+
+type Recipient struct {
+	ChatId string
+}
+
+func NewRecipient() tele.Recipient {
+	return Recipient{
+		ChatId: os.Getenv("TELEGRAM_ADMIN_CHAT_ID"),
+	}
+}
+
+func (r Recipient) Recipient() string {
+	return r.ChatId
+}
 
 func main() {
 	// load .env file if any otherwise use env set
@@ -25,6 +40,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 		return
+	}
+
+	// Notify update if chat present
+	if os.Getenv("TELEGRAM_USER_CHAT_ID") != "" {
+		b.Send(NewRecipient(), `🤖 🤖 [BOT] Version: *`+utils.RetrieveVersion()+`* Succesfully deployed . 🤖 🤖`)
 	}
 
 	// Middleware
