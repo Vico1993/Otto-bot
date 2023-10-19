@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Notify update if chat present
-	if os.Getenv("TELEGRAM_USER_CHAT_ID") != "" {
+	if os.Getenv("TELEGRAM_ADMIN_CHAT_ID") != "" {
 		_, err := b.Send(NewRecipient(), `🤖 🤖 [BOT] Version: *`+utils.RetrieveVersion()+`* Succesfully deployed . 🤖 🤖`)
 		if err != nil {
 			fmt.Println(err.Error())
