@@ -13,7 +13,7 @@ func TypeCheck(next tele.HandlerFunc) tele.HandlerFunc {
 
 		// Exception if Admin chat id
 		if strconv.FormatInt(c.Chat().ID, 10) == os.Getenv("TELEGRAM_ADMIN_CHAT_ID") {
-			next(c)
+			return next(c)
 		}
 
 		// Check if in Group
