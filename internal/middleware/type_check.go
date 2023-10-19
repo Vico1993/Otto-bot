@@ -1,12 +1,20 @@
 package middleware
 
 import (
+	"os"
+	"strconv"
+
 	tele "gopkg.in/telebot.v3"
 )
 
 // Check if we are talking to the bot in a group
 func TypeCheck(next tele.HandlerFunc) tele.HandlerFunc {
 	return func(c tele.Context) error {
+
+		// Exception if Admin chat id
+		if strconv.FormatInt(c.Chat().ID, 10) == os.Getenv("TELEGRAM_ADMIN_CHAT_ID") {
+			return next(c)
+		}
 
 		// Check if in Group
 		if !isGroupChat(*c.Chat()) {
