@@ -1,42 +1,28 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/Vico1993/Otto-bot/internal/handles"
 	"github.com/Vico1993/Otto-bot/internal/middleware"
 	"github.com/Vico1993/Otto-bot/internal/utils"
+	"github.com/go-telegram/bot"
 	"github.com/subosito/gotenv"
-	tele "gopkg.in/telebot.v3"
 )
-
-type Recipient struct {
-	ChatId string
-}
-
-func NewRecipient() tele.Recipient {
-	return Recipient{
-		ChatId: os.Getenv("TELEGRAM_ADMIN_CHAT_ID"),
-	}
-}
-
-func (r Recipient) Recipient() string {
-	return r.ChatId
-}
 
 func main() {
 	// load .env file if any otherwise use env set
 	_ = gotenv.Load()
 
-	pref := tele.Settings{
-		Token:  os.Getenv("TELEGRAM_BOT_TOKEN"),
-		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
+	opts := []bot.Option{
+		// Middleware
+		bot.WithMiddlewares(middleware.TypeCheck),
 	}
 
-	b, err := tele.NewBot(pref)
+	b, err := bot.New(os.Getenv("TELEGRAM_BOT_TOKEN"), opts...)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -44,34 +30,33 @@ func main() {
 
 	// Notify update if chat present
 	if os.Getenv("TELEGRAM_ADMIN_CHAT_ID") != "" {
-		_, err := b.Send(NewRecipient(), `🤖 🤖 [BOT] Version: *`+utils.RetrieveVersion()+`* Succesfully deployed . 🤖 🤖`)
+		_, err := b.SendMessage(context.TODO(), &bot.SendMessageParams{
+			ChatID: os.Getenv("TELEGRAM_ADMIN_CHAT_ID"),
+			Text:   `🤖 🤖 [BOT] Version: *` + utils.RetrieveVersion() + `* Succesfully deployed . 🤖 🤖`,
+		})
 		if err != nil {
 			fmt.Println(err.Error())
 		}
 	}
 
-	// Middleware
-	b.Use(middleware.TypeCheck)
-
 	// Handles
-	b.Handle("/hello", handles.Hello)
-	b.Handle("/ping", handles.Ping)
-	b.Handle("/start", handles.Start)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/hello", bot.MatchTypeExact, handles.Hello)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/ping", bot.MatchTypeExact, handles.Ping)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, handles.Start)
 
 	// Feeds
-	b.Handle("/feeds", handles.ListFeeds)
-	b.Handle("/feedsadd", handles.AddFeeds)
-	b.Handle("/feedsdisabled", handles.DisableFeeds)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/feeds", bot.MatchTypeExact, handles.ListFeeds)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/feedsadd", bot.MatchTypeContains, handles.AddFeeds)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/feedsdisabled", bot.MatchTypeExact, handles.DisableFeeds)
 
 	// Tags
-	b.Handle("/tags", handles.TagsList)
-	b.Handle("/tagsadd", handles.TagsAdd)
-	b.Handle("/tagsdelete", handles.TagsDelete)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/tags", bot.MatchTypeExact, handles.TagsList)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/tagsadd", bot.MatchTypeContains, handles.TagsAdd)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/tagsdelete", bot.MatchTypeExact, handles.TagsDelete)
 
-	// onCallback
-	b.Handle(tele.OnCallback, handles.OnCallback)
+	// Callback
+	b.RegisterHandler(bot.HandlerTypeCallbackQueryData, "_callback", bot.MatchTypeContains, handles.OnCallback)
 
 	fmt.Println("Ready to Go!...")
-
-	b.Start()
+	b.Start(context.TODO())
 }

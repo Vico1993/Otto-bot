@@ -1,62 +1,85 @@
 package handles
 
 import (
+	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/Vico1993/Otto-bot/internal/service"
 	"github.com/Vico1993/Otto-bot/internal/utils"
-	tele "gopkg.in/telebot.v3"
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 )
 
-func TagsList(c tele.Context) error {
-	tags := ottoService.ListTags(strconv.FormatInt(c.Chat().ID, 10))
+func TagsList(ctx context.Context, b *bot.Bot, update *models.Update) {
+	tags := ottoService.ListTags(strconv.FormatInt(update.Message.Chat.ID, 10))
 	if len(tags) == 0 {
-		return c.Reply("Thank you for your input, but it appears this chat doesn't watch for any tags. Add some!!!")
+		utils.Reply(ctx, b, update, "Thank you for your input, but it appears this chat doesn't watch for any tags. Add some!!!", false)
+		return
 	}
 
 	reply := buildTagListReply(tags)
-	return c.Reply(reply, &tele.SendOptions{
-		ParseMode: "Markdown",
-	})
+	utils.Reply(ctx, b, update, reply, false)
 }
 
-func TagsDelete(c tele.Context) error {
-	tags := ottoService.ListTags(strconv.FormatInt(c.Chat().ID, 10))
+func TagsDelete(ctx context.Context, b *bot.Bot, update *models.Update) {
+	tags := ottoService.ListTags(strconv.FormatInt(update.Message.Chat.ID, 10))
 	if len(tags) == 0 {
-		return c.Reply("Thank you for your input, but it appears this chat doesn't watch for any tags. Add some!!!")
+		utils.Reply(ctx, b, update, "Thank you for your input, but it appears this chat doesn't watch for any tags. Add some!!!", false)
+		return
 	}
 
-	keyboard := make([][]tele.InlineButton, len(tags))
-
+	var keyboard [][]models.InlineKeyboardButton
 	for _, tag := range tags {
-		keyboard = append(keyboard, []tele.InlineButton{
+		keyboard = append(keyboard, []models.InlineKeyboardButton{
 			{
-				Text: tag,
-				Data: "deleteTags_" + tag,
+				Text:         tag,
+				CallbackData: "deleteTags_" + tag + "_callback",
 			},
 		})
 	}
 
-	return c.Send("Please select the tag you want to delete", &tele.ReplyMarkup{
-		RemoveKeyboard: true,
-		InlineKeyboard: keyboard,
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:           update.Message.Chat.ID,
+		Text:             "Please select the tag you want to delete",
+		ReplyToMessageID: update.Message.ID,
+		ReplyMarkup: &models.InlineKeyboardMarkup{
+			InlineKeyboard: keyboard,
+		},
 	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
 
 func deleteTag(chatId string, tag string) bool {
 	return ottoService.DeleteTag(chatId, tag)
 }
 
-func TagsAdd(c tele.Context) error {
-	tagsToAdd := buildTagListFromPayload(c.Message().Payload)
-
-	tags := ottoService.AddTags(strconv.FormatInt(c.Chat().ID, 10), tagsToAdd)
-	if tags == nil {
-		return c.Reply(service.ReturnError())
+func TagsAdd(ctx context.Context, b *bot.Bot, update *models.Update) {
+	var data []string
+	text := strings.Trim(update.Message.Text, " ")
+	if text != "" {
+		data = strings.Split(text, " ")
 	}
 
-	return c.Reply("Great news! We've successfully added " + strconv.Itoa(len(tagsToAdd)) + " tags as requested")
+	if len(data) == 1 || len(data) == 0 {
+		utils.Reply(ctx, b, update, "Sorry, something happens couldn't add your tags", false)
+		return
+	}
+
+	payload := data[1]
+	tagsToAdd := buildTagListFromPayload(payload)
+
+	tags := ottoService.AddTags(strconv.FormatInt(update.Message.Chat.ID, 10), tagsToAdd)
+	if tags == nil {
+		utils.Reply(ctx, b, update, service.ReturnError(), false)
+		return
+	}
+
+	utils.Reply(ctx, b, update, "Great news! We've successfully added "+strconv.Itoa(len(tagsToAdd))+" tags as requested", false)
 }
 
 func buildTagListFromPayload(payload string) []string {

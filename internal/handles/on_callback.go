@@ -1,31 +1,42 @@
 package handles
 
 import (
+	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
-	tele "gopkg.in/telebot.v3"
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 )
 
-func OnCallback(c tele.Context) error {
-	b := c.Callback()
-
+func OnCallback(ctx context.Context, b *bot.Bot, update *models.Update) {
 	var callback []string
-	if strings.Contains(b.Data, "_") {
-		callback = strings.Split(b.Data, "_")
+	if strings.Contains(update.CallbackQuery.Data, "_") {
+		callback = strings.Split(update.CallbackQuery.Data, "_")
 	} else {
-		callback = []string{b.Data}
+		callback = []string{update.CallbackQuery.Data}
 	}
 
 	cmd := callback[0]
+	chatId := strconv.FormatInt(update.CallbackQuery.Message.Chat.ID, 10)
 
+	var text string
 	if cmd == "disableFeeds" {
-		disableFeedsCallBack(strconv.FormatInt(c.Chat().ID, 10), callback[1])
-		return c.Send("Feed has been disabled")
+		disableFeedsCallBack(chatId, callback[1])
+		text = "Feed has been disabled"
 	} else if cmd == "deleteTags" {
-		deleteTag(strconv.FormatInt(c.Chat().ID, 10), callback[1])
-		return c.Send("Tag has been deleted")
+		deleteTag(chatId, callback[1])
+		text = "Tag has been deleted"
 	}
 
-	return nil
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID: chatId,
+		Text:   text,
+	})
+	if err != nil {
+		fmt.Println("Couldn't OnCallback response message: " + text)
+		fmt.Println(err.Error())
+		fmt.Println("------------------")
+	}
 }
