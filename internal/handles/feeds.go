@@ -1,24 +1,30 @@
 package handles
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/Vico1993/Otto-bot/internal/service"
-	tele "gopkg.in/telebot.v3"
+	"github.com/Vico1993/Otto-bot/internal/utils"
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 )
 
-func ListFeeds(c tele.Context) error {
-	feeds := ottoService.ListFeeds(strconv.FormatInt(c.Chat().ID, 10))
+func ListFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
+	feeds := ottoService.ListFeeds(strconv.FormatInt(update.Message.Chat.ID, 10))
 	if len(feeds) == 0 {
-		return c.Reply("Thank you for your input, but it appears this chat doesn't watch for any feed. Add some!!!")
+		fmt.Println("HERE")
+		utils.Reply(ctx, b, update, "Thank you for your input, but it appears this chat doesn't watch for any feed. Add some!!!", false)
+		return
 	}
 
 	reply := buildListReply(feeds)
-	return c.Reply(reply, &tele.SendOptions{
-		ParseMode: "Markdown",
-	})
+	utils.Reply(ctx, b, update, reply, false)
+
+	return
 }
 
 func buildListReply(list []service.Feeds) string {
@@ -30,48 +36,71 @@ func buildListReply(list []service.Feeds) string {
 	return reply
 }
 
-func DisableFeeds(c tele.Context) error {
-	feeds := ottoService.ListFeeds(strconv.FormatInt(c.Chat().ID, 10))
-	keyboard := make([][]tele.InlineButton, len(feeds))
+func DisableFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
+	feeds := ottoService.ListFeeds(strconv.FormatInt(update.Message.Chat.ID, 10))
 
+	var keyboard [][]models.InlineKeyboardButton
 	for _, feed := range feeds {
-		keyboard = append(keyboard, []tele.InlineButton{
+		keyboard = append(keyboard, []models.InlineKeyboardButton{
 			{
-				Text: feed.Url,
-				Data: "disableFeeds_" + feed.Id,
+				Text:         feed.Url,
+				CallbackData: "disableFeeds_" + feed.Id + "_callback",
 			},
 		})
 	}
 
-	return c.Send("Please select the feed you want to disable", &tele.ReplyMarkup{
-		RemoveKeyboard: true,
-		InlineKeyboard: keyboard,
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:           update.Message.Chat.ID,
+		Text:             "Please select the feed you want to disable",
+		ReplyToMessageID: update.Message.ID,
+		ReplyMarkup: &models.InlineKeyboardMarkup{
+			InlineKeyboard: keyboard,
+		},
 	})
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
 
 func disableFeedsCallBack(chatId string, feedId string) {
 	service.NewOttoService().DisableFeeds(chatId, feedId)
 }
 
-func AddFeeds(c tele.Context) error {
-	payload := c.Message().Payload
+func AddFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
+	var data []string
+	text := strings.Trim(update.Message.Text, " ")
+	if text != "" {
+		data = strings.Split(text, " ")
+	}
+
+	if len(data) == 0 {
+		utils.Reply(ctx, b, update, "Sorry, something happens couldn't add your feeds", false)
+		return
+	}
+
+	payload := data[1]
+
 	if !isValidUrl(payload) {
-		return c.Reply("Sorry, it seems your url is not well formated. Please give me a valid RSS url")
+		utils.Reply(ctx, b, update, "Sorry, it seems your url is not well formated. Please give me a valid RSS url", false)
+		return
 	}
 
 	fmt.Println(payload)
 
 	feed := ottoService.AddFeed(payload)
 	if feed == nil {
-		return c.Reply("Sorry, something happens couldn't add your feeds")
+		utils.Reply(ctx, b, update, "Sorry, something happens couldn't add your feeds", false)
+		return
 	}
 
-	added := ottoService.LinkFeedToChat(strconv.FormatInt(c.Chat().ID, 10), feed.Id)
+	added := ottoService.LinkFeedToChat(strconv.FormatInt(update.Message.Chat.ID, 10), feed.Id)
 	if !added {
-		return c.Reply("Sorry, something happens couldn't add your feeds")
+		utils.Reply(ctx, b, update, "Sorry, something happens couldn't add your feeds", false)
+		return
 	}
 
-	return c.Reply("All good! I will watch this feed closely!")
+	utils.Reply(ctx, b, update, "All good! I will watch this feed closely!", false)
 }
 
 // isValidUrl tests a string to determine if it is a well-structured url or not.
