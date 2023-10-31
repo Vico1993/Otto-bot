@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/Vico1993/Otto-bot/internal/utils"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
@@ -22,10 +23,7 @@ func TypeCheck(next bot.HandlerFunc) bot.HandlerFunc {
 
 		// Check if in Group
 		if !isGroupChat(&update.Message.Chat) {
-			b.SendMessage(ctx, &bot.SendMessageParams{
-				ChatID: chatId,
-				Text:   "Sorry can't talk here! We need to be in a group!",
-			})
+			utils.Reply(ctx, b, update, "Sorry can't talk here! We need to be in a group!", false)
 			return
 		}
 

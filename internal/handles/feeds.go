@@ -23,8 +23,6 @@ func ListFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	reply := buildListReply(feeds)
 	utils.Reply(ctx, b, update, reply, false)
-
-	return
 }
 
 func buildListReply(list []service.Feeds) string {

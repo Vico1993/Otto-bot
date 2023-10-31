@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -18,5 +19,10 @@ func Reply(ctx context.Context, b *bot.Bot, update *models.Update, text string, 
 		params.ParseMode = models.ParseModeMarkdown
 	}
 
-	b.SendMessage(ctx, params)
+	_, err := b.SendMessage(ctx, params)
+	if err != nil {
+		fmt.Println("Couldn't post message: " + text)
+		fmt.Println(err.Error())
+		fmt.Println("------------------")
+	}
 }

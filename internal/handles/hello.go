@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/rand"
 
+	"github.com/Vico1993/Otto-bot/internal/utils"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
@@ -22,11 +23,7 @@ var greetings []string = []string{
 }
 
 func Hello(ctx context.Context, b *bot.Bot, update *models.Update) {
-	b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID:           update.Message.Chat.ID,
-		Text:             getGreetingsText(),
-		ReplyToMessageID: update.Message.ID,
-	})
+	utils.Reply(ctx, b, update, getGreetingsText(), false)
 }
 
 // Return a random text

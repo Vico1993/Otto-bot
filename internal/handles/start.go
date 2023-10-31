@@ -20,5 +20,4 @@ func Start(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	chats[chat.Id] = chat
 	utils.Reply(ctx, b, update, "Hello "+update.Message.Chat.Username, false)
-	return
 }

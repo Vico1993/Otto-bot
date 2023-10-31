@@ -21,7 +21,6 @@ func TagsList(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	reply := buildTagListReply(tags)
 	utils.Reply(ctx, b, update, reply, false)
-	return
 }
 
 func TagsDelete(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -81,7 +80,6 @@ func TagsAdd(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 
 	utils.Reply(ctx, b, update, "Great news! We've successfully added "+strconv.Itoa(len(tagsToAdd))+" tags as requested", false)
-	return
 }
 
 func buildTagListFromPayload(payload string) []string {

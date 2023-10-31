@@ -2,6 +2,7 @@ package handles
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -29,8 +30,13 @@ func OnCallback(ctx context.Context, b *bot.Bot, update *models.Update) {
 		text = "Tag has been deleted"
 	}
 
-	b.SendMessage(ctx, &bot.SendMessageParams{
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID: chatId,
 		Text:   text,
 	})
+	if err != nil {
+		fmt.Println("Couldn't OnCallback response message: " + text)
+		fmt.Println(err.Error())
+		fmt.Println("------------------")
+	}
 }
