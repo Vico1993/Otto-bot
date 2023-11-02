@@ -26,9 +26,9 @@ func ListFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
 }
 
 func buildListReply(list []service.Feeds) string {
-	reply := ""
-	for k, feed := range list {
-		reply += "\n" + strconv.Itoa(k+1) + ". " + feed.Url
+	reply := "📚 Here's the lineup of feeds this chat is subscribed to: \n"
+	for _, feed := range list {
+		reply += "\n " + feed.Url
 	}
 
 	return reply

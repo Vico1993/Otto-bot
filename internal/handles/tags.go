@@ -103,7 +103,7 @@ func buildTagListFromPayload(payload string) []string {
 }
 
 func buildTagListReply(list []string) string {
-	reply := ""
+	reply := "🔍 Here's what I'm on the lookout for in this chat \n"
 	for _, tag := range list {
 		reply += "\n #" + tag
 	}
