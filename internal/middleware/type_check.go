@@ -13,6 +13,11 @@ import (
 // Check if we are talking to the bot in a group
 func TypeCheck(next bot.HandlerFunc) bot.HandlerFunc {
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		if update.Message == nil {
+			next(ctx, b, update)
+			return
+		}
+
 		chatId := update.Message.Chat.ID
 
 		// Exception if Admin chat id

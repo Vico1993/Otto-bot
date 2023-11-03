@@ -13,6 +13,7 @@ func Reply(ctx context.Context, b *bot.Bot, update *models.Update, text string, 
 		ChatID:           update.Message.Chat.ID,
 		Text:             text,
 		ReplyToMessageID: update.Message.ID,
+		MessageThreadID:  update.Message.MessageThreadID,
 	}
 
 	if parseMode {

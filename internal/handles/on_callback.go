@@ -31,8 +31,9 @@ func OnCallback(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 
 	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
-		ChatID: chatId,
-		Text:   text,
+		ChatID:          chatId,
+		Text:            text,
+		MessageThreadID: update.CallbackQuery.Message.MessageThreadID,
 	})
 	if err != nil {
 		fmt.Println("Couldn't OnCallback response message: " + text)
