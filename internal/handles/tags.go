@@ -13,7 +13,7 @@ import (
 )
 
 func TagsList(ctx context.Context, b *bot.Bot, update *models.Update) {
-	tags := ottoService.ListTags(strconv.FormatInt(update.Message.Chat.ID, 10))
+	tags := ottoService.ListTags(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID))
 	if len(tags) == 0 {
 		utils.Reply(ctx, b, update, "Thank you for your input, but it appears this chat doesn't watch for any tags. Add some!!!", false)
 		return
@@ -24,7 +24,7 @@ func TagsList(ctx context.Context, b *bot.Bot, update *models.Update) {
 }
 
 func TagsDelete(ctx context.Context, b *bot.Bot, update *models.Update) {
-	tags := ottoService.ListTags(strconv.FormatInt(update.Message.Chat.ID, 10))
+	tags := ottoService.ListTags(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID))
 	if len(tags) == 0 {
 		utils.Reply(ctx, b, update, "Thank you for your input, but it appears this chat doesn't watch for any tags. Add some!!!", false)
 		return
@@ -44,6 +44,7 @@ func TagsDelete(ctx context.Context, b *bot.Bot, update *models.Update) {
 		ChatID:           update.Message.Chat.ID,
 		Text:             "Please select the tag you want to delete",
 		ReplyToMessageID: update.Message.ID,
+		MessageThreadID:  update.Message.MessageThreadID,
 		ReplyMarkup: &models.InlineKeyboardMarkup{
 			InlineKeyboard: keyboard,
 		},
@@ -54,8 +55,8 @@ func TagsDelete(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 }
 
-func deleteTag(chatId string, tag string) bool {
-	return ottoService.DeleteTag(chatId, tag)
+func deleteTag(chatId string, threadId string, tag string) bool {
+	return ottoService.DeleteTag(chatId, threadId, tag)
 }
 
 func TagsAdd(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -73,7 +74,7 @@ func TagsAdd(ctx context.Context, b *bot.Bot, update *models.Update) {
 	payload := data[1]
 	tagsToAdd := buildTagListFromPayload(payload)
 
-	tags := ottoService.AddTags(strconv.FormatInt(update.Message.Chat.ID, 10), tagsToAdd)
+	tags := ottoService.AddTags(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID), tagsToAdd)
 	if tags == nil {
 		utils.Reply(ctx, b, update, service.ReturnError(), false)
 		return
