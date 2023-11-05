@@ -30,6 +30,6 @@ func TestBuildTagListFromPayloadWithSpacesAndComma(t *testing.T) {
 func TestBuildTagListReply(t *testing.T) {
 	res := buildTagListReply([]string{"test1", "test2", "test3"})
 
-	assert.Equal(t, "\n #test1\n #test2\n #test3", res, "Should have a string that contain 3 tags")
+	assert.Equal(t, "🔍 Here's what I'm on the lookout for in this chat \n\n #test1\n #test2\n #test3", res, "Should have a string that contain 3 tags")
 
 }

@@ -14,9 +14,8 @@ import (
 )
 
 func ListFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
-	feeds := ottoService.ListFeeds(strconv.FormatInt(update.Message.Chat.ID, 10))
+	feeds := ottoService.ListFeeds(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID))
 	if len(feeds) == 0 {
-		fmt.Println("HERE")
 		utils.Reply(ctx, b, update, "Thank you for your input, but it appears this chat doesn't watch for any feed. Add some!!!", false)
 		return
 	}
@@ -35,7 +34,7 @@ func buildListReply(list []service.Feeds) string {
 }
 
 func DisableFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
-	feeds := ottoService.ListFeeds(strconv.FormatInt(update.Message.Chat.ID, 10))
+	feeds := ottoService.ListFeeds(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID))
 
 	var keyboard [][]models.InlineKeyboardButton
 	for _, feed := range feeds {
@@ -51,6 +50,7 @@ func DisableFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
 		ChatID:           update.Message.Chat.ID,
 		Text:             "Please select the feed you want to disable",
 		ReplyToMessageID: update.Message.ID,
+		MessageThreadID:  update.Message.MessageThreadID,
 		ReplyMarkup: &models.InlineKeyboardMarkup{
 			InlineKeyboard: keyboard,
 		},
@@ -61,8 +61,8 @@ func DisableFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 }
 
-func disableFeedsCallBack(chatId string, feedId string) {
-	service.NewOttoService().DisableFeeds(chatId, feedId)
+func disableFeedsCallBack(chatId string, threadId string, feedId string) {
+	service.NewOttoService().DisableFeeds(chatId, threadId, feedId)
 }
 
 func AddFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -92,7 +92,7 @@ func AddFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	added := ottoService.LinkFeedToChat(strconv.FormatInt(update.Message.Chat.ID, 10), feed.Id)
+	added := ottoService.LinkFeedToChat(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID), feed.Id)
 	if !added {
 		utils.Reply(ctx, b, update, "Sorry, something happens couldn't add your feeds", false)
 		return

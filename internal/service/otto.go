@@ -57,13 +57,13 @@ type ChatDeleteFeedResponse struct {
 
 type IOttoService interface {
 	InitChat(chatId string, userId string, threadId string, tags []string) *Chat
-	ListFeeds(chatId string) []Feeds
-	ListTags(chatId string) []string
+	ListFeeds(chatId string, threadId string) []Feeds
+	ListTags(chatId string, threadId string) []string
 	AddFeed(feedUrl string) *Feed
-	LinkFeedToChat(chatId string, feedId string) bool
-	DeleteTag(chatId string, tag string) bool
-	AddTags(chatId string, tags []string) []string
-	DisableFeeds(chatId string, feedId string) bool
+	LinkFeedToChat(chatId string, threadId string, feedId string) bool
+	DeleteTag(chatId string, threadId string, tag string) bool
+	AddTags(chatId string, threadId string, tags []string) []string
+	DisableFeeds(chatId string, threadId string, feedId string) bool
 }
 
 type OttoService struct {
@@ -79,13 +79,18 @@ func NewOttoService() IOttoService {
 
 // Create the chat in Otto DB
 func (s *OttoService) InitChat(chatId string, userId string, threadId string, tags []string) *Chat {
-	data := []byte(`{
+	dataStr := `{
 		"chat_id": "` + chatId + `",
 		"user_id": "` + userId + `",
 		"thread_id": "` + threadId + `",
 		"tags": []
-	}`)
+	}`
 
+	if threadId == "" {
+		dataStr = strings.Replace(dataStr, `"thread_id": "",`, "", 1)
+	}
+
+	data := []byte(dataStr)
 	req, err := http.NewRequest(
 		http.MethodPost,
 		os.Getenv("OTTO_API_URL")+"/chats",
@@ -112,10 +117,12 @@ func (s *OttoService) InitChat(chatId string, userId string, threadId string, ta
 }
 
 // Retrieve all feeds attached to a chatId
-func (s *OttoService) ListFeeds(chatId string) []Feeds {
+func (s *OttoService) ListFeeds(chatId string, threadId string) []Feeds {
+	url := s.buildUrl(chatId, threadId, "/feeds")
+
 	req, err := http.NewRequest(
 		http.MethodGet,
-		os.Getenv("OTTO_API_URL")+"/chats/"+chatId+"/feeds",
+		url,
 		strings.NewReader(
 			string([]byte{}),
 		),
@@ -137,10 +144,12 @@ func (s *OttoService) ListFeeds(chatId string) []Feeds {
 }
 
 // Retrieve all tags attached to a chatId
-func (s *OttoService) ListTags(chatId string) []string {
+func (s *OttoService) ListTags(chatId string, threadId string) []string {
+	url := s.buildUrl(chatId, threadId, "/tags")
+
 	req, err := http.NewRequest(
 		http.MethodGet,
-		os.Getenv("OTTO_API_URL")+"/chats/"+chatId+"/tags",
+		url,
 		strings.NewReader(
 			string([]byte{}),
 		),
@@ -162,14 +171,15 @@ func (s *OttoService) ListTags(chatId string) []string {
 }
 
 // Add tags to the chats
-func (s *OttoService) AddTags(chatId string, tags []string) []string {
+func (s *OttoService) AddTags(chatId string, threadId string, tags []string) []string {
 	data := []byte(`{
 		"tags": ["` + strings.Join(tags, "\",\"") + `"]
 	}`)
 
+	url := s.buildUrl(chatId, threadId, "/tags")
 	req, err := http.NewRequest(
 		http.MethodPost,
-		os.Getenv("OTTO_API_URL")+"/chats/"+chatId+"/tags",
+		url,
 		strings.NewReader(
 			string(data),
 		),
@@ -193,9 +203,11 @@ func (s *OttoService) AddTags(chatId string, tags []string) []string {
 }
 
 // Delete one tag from the chat
-func (s *OttoService) DeleteTag(chatId string, tag string) bool {
+func (s *OttoService) DeleteTag(chatId string, threadId string, tag string) bool {
+	url := s.buildUrl(chatId, threadId, "/tags/"+tag)
+
 	// Create request
-	req, err := http.NewRequest("DELETE", os.Getenv("OTTO_API_URL")+"/chats/"+chatId+"/tags/"+tag, nil)
+	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		fmt.Println("Error creating the request to delete the tag: " + err.Error())
 		return false
@@ -213,9 +225,10 @@ func (s *OttoService) DeleteTag(chatId string, tag string) bool {
 	return !utils.InSlice(tag, res.Tags)
 }
 
-func (s *OttoService) DisableFeeds(chatId string, feedId string) bool {
+func (s *OttoService) DisableFeeds(chatId string, threadId string, feedId string) bool {
+	url := s.buildUrl(chatId, threadId, "/feeds/"+feedId)
 	// Create request
-	req, err := http.NewRequest("DELETE", os.Getenv("OTTO_API_URL")+"/chats/"+chatId+"/feeds/"+feedId, nil)
+	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		fmt.Println("Error creating the request to disabled the feed in chat: " + err.Error())
 		return false
@@ -265,10 +278,12 @@ func (s *OttoService) AddFeed(feedUrl string) *Feed {
 }
 
 // link feed to the current chat
-func (s *OttoService) LinkFeedToChat(chatId string, feedId string) bool {
+func (s *OttoService) LinkFeedToChat(chatId string, threadId string, feedId string) bool {
+	url := s.buildUrl(chatId, threadId, "/feeds/"+feedId)
+
 	req, err := http.NewRequest(
 		http.MethodPost,
-		os.Getenv("OTTO_API_URL")+"/chats/"+chatId+"/feeds/"+feedId,
+		url,
 		strings.NewReader(
 			string([]byte{}),
 		),
@@ -311,4 +326,12 @@ func (s *OttoService) executeRequest(req *http.Request) ([]byte, error) {
 	}
 
 	return body, nil
+}
+
+func (s *OttoService) buildUrl(chatId string, threadId string, path string) string {
+	url := os.Getenv("OTTO_API_URL") + "/chats/" + chatId + path
+	if threadId != "" {
+		url = os.Getenv("OTTO_API_URL") + "/chats/" + chatId + "/" + threadId + path
+	}
+	return url
 }

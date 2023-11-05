@@ -12,10 +12,15 @@ import (
 
 // Manage the `/start`
 func Start(ctx context.Context, b *bot.Bot, update *models.Update) {
+	threadId := strconv.Itoa(update.Message.MessageThreadID)
+	if threadId == "0" {
+		threadId = ""
+	}
+
 	chat := ottoService.InitChat(
 		strconv.FormatInt(update.Message.Chat.ID, 10),
 		strconv.FormatInt(update.Message.From.ID, 10),
-		strconv.Itoa(update.Message.MessageThreadID),
+		threadId,
 		[]string{},
 	)
 	if chat == nil {

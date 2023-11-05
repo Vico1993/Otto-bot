@@ -20,20 +20,23 @@ func OnCallback(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	cmd := callback[0]
 	chatId := strconv.FormatInt(update.CallbackQuery.Message.Chat.ID, 10)
+	threaId := update.CallbackQuery.Message.MessageThreadID
+
+	fmt.Println(callback, callback[1])
 
 	var text string
 	if cmd == "disableFeeds" {
-		disableFeedsCallBack(chatId, callback[1])
+		disableFeedsCallBack(chatId, strconv.Itoa(threaId), callback[1])
 		text = "Feed has been disabled"
 	} else if cmd == "deleteTags" {
-		deleteTag(chatId, callback[1])
+		deleteTag(chatId, strconv.Itoa(threaId), callback[1])
 		text = "Tag has been deleted"
 	}
 
 	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
 		ChatID:          chatId,
 		Text:            text,
-		MessageThreadID: update.CallbackQuery.Message.MessageThreadID,
+		MessageThreadID: threaId,
 	})
 	if err != nil {
 		fmt.Println("Couldn't OnCallback response message: " + text)
