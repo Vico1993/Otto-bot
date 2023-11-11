@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Vico1993/Otto-bot/internal/service"
 	"github.com/Vico1993/Otto-bot/internal/utils"
+	"github.com/Vico1993/Otto-client/otto"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 )
 
 func ListFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
-	feeds := ottoService.ListFeeds(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID))
+	feeds := OttoClient.Feed.List(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID))
 	if len(feeds) == 0 {
 		utils.Reply(ctx, b, update, "Thank you for your input, but it appears this chat doesn't watch for any feed. Add some!!!", false)
 		return
@@ -24,7 +24,7 @@ func ListFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
 	utils.Reply(ctx, b, update, reply, false)
 }
 
-func buildListReply(list []service.Feeds) string {
+func buildListReply(list []otto.Feed) string {
 	reply := "📚 Here's the lineup of feeds this chat is subscribed to: \n"
 	for _, feed := range list {
 		reply += "\n " + feed.Url
@@ -34,7 +34,7 @@ func buildListReply(list []service.Feeds) string {
 }
 
 func DisableFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
-	feeds := ottoService.ListFeeds(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID))
+	feeds := OttoClient.Feed.List(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID))
 
 	var keyboard [][]models.InlineKeyboardButton
 	for _, feed := range feeds {
@@ -62,7 +62,7 @@ func DisableFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
 }
 
 func disableFeedsCallBack(chatId string, threadId string, feedId string) {
-	service.NewOttoService().DisableFeeds(chatId, threadId, feedId)
+	OttoClient.Feed.UnLink(chatId, threadId, feedId)
 }
 
 func AddFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -86,13 +86,13 @@ func AddFeeds(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	fmt.Println(payload)
 
-	feed := ottoService.AddFeed(payload)
+	feed := OttoClient.Feed.Create(payload)
 	if feed == nil {
 		utils.Reply(ctx, b, update, "Sorry, something happens couldn't add your feeds", false)
 		return
 	}
 
-	added := ottoService.LinkFeedToChat(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID), feed.Id)
+	added := OttoClient.Feed.Link(strconv.FormatInt(update.Message.Chat.ID, 10), strconv.Itoa(update.Message.MessageThreadID), feed.Id)
 	if !added {
 		utils.Reply(ctx, b, update, "Sorry, something happens couldn't add your feeds", false)
 		return

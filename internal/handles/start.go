@@ -17,7 +17,7 @@ func Start(ctx context.Context, b *bot.Bot, update *models.Update) {
 		threadId = ""
 	}
 
-	chat := ottoService.InitChat(
+	chat := OttoClient.Chat.Create(
 		strconv.FormatInt(update.Message.Chat.ID, 10),
 		strconv.FormatInt(update.Message.From.ID, 10),
 		threadId,
@@ -28,6 +28,5 @@ func Start(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	chats[chat.Id] = chat
 	utils.Reply(ctx, b, update, "Hello "+update.Message.Chat.Username, false)
 }

@@ -1,6 +1,17 @@
 package handles
 
-import "github.com/Vico1993/Otto-bot/internal/service"
+import (
+	"os"
 
-var ottoService = service.NewOttoService()
-var chats map[string]*service.Chat = make(map[string]*service.Chat)
+	"github.com/Vico1993/Otto-client/otto"
+)
+
+var OttoClient *otto.Client
+
+// Initialise
+func Init() {
+	OttoClient = otto.NewClient(
+		nil,
+		os.Getenv("OTTO_API_URL"),
+	)
+}
