@@ -41,6 +41,9 @@ func main() {
 		}
 	}
 
+	// Initialise handles
+	handles.Init()
+
 	// Handles
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/hello", bot.MatchTypeExact, handles.Hello)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/ping", bot.MatchTypeExact, handles.Ping)
