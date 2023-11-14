@@ -8,9 +8,9 @@ import (
 
 	"github.com/Vico1993/Otto-bot/internal/handles"
 	"github.com/Vico1993/Otto-bot/internal/middleware"
+	"github.com/Vico1993/Otto-bot/internal/service"
 	"github.com/Vico1993/Otto-bot/internal/utils"
 	"github.com/go-telegram/bot"
-	"github.com/go-telegram/bot/models"
 	"github.com/subosito/gotenv"
 )
 
@@ -21,6 +21,7 @@ func main() {
 	opts := []bot.Option{
 		// Middleware
 		bot.WithMiddlewares(middleware.TypeCheck),
+		bot.WithMiddlewares(middleware.UserAddedRemoved),
 	}
 
 	b, err := bot.New(os.Getenv("TELEGRAM_BOT_TOKEN"), opts...)
@@ -29,17 +30,11 @@ func main() {
 		return
 	}
 
+	// Initilisation of services
+	service.Init(b)
+
 	// Notify update if chat present
-	if os.Getenv("TELEGRAM_ADMIN_CHAT_ID") != "" {
-		_, err := b.SendMessage(context.TODO(), &bot.SendMessageParams{
-			ChatID:    os.Getenv("TELEGRAM_ADMIN_CHAT_ID"),
-			Text:      `🤖 🤖 [BOT] Version: <b>` + utils.RetrieveVersion() + `</b> Succesfully deployed . 🤖 🤖`,
-			ParseMode: models.ParseModeHTML,
-		})
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-	}
+	service.AdminService.Log(`🤖 🤖 [BOT] Version: <b>` + utils.RetrieveVersion() + `</b> Succesfully deployed . 🤖 🤖`)
 
 	// Initialise handles
 	handles.Init()
