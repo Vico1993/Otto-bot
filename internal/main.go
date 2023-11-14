@@ -43,6 +43,7 @@ func main() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/hello", bot.MatchTypeExact, handles.Hello)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/ping", bot.MatchTypeExact, handles.Ping)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, handles.Start)
+	b.RegisterHandler(bot.HandlerTypeMessageText, "/help", bot.MatchTypeExact, handles.Help)
 
 	// Feeds
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/feeds", bot.MatchTypeExact, handles.ListFeeds)
