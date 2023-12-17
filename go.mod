@@ -3,7 +3,7 @@ module github.com/Vico1993/Otto-bot
 go 1.20
 
 require (
-	github.com/Vico1993/Otto-client v1.0.0
+	github.com/Vico1993/Otto-client v1.3.2
 	github.com/stretchr/testify v1.8.4
 	github.com/subosito/gotenv v1.6.0
 )
