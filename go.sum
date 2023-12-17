@@ -1,5 +1,5 @@
-github.com/Vico1993/Otto-client v1.0.0 h1:GTicUXko6xcjdgJviTR1isJxXzkbBoYstQhqIyK6iSY=
-github.com/Vico1993/Otto-client v1.0.0/go.mod h1:ZuLiq0gcOf0opUwjxG7fkjKpDNAx5aI63nZnBH6+F00=
+github.com/Vico1993/Otto-client v1.3.2 h1:81reXJGxQWvTqge8PX3Ec8I6SzaQDqgbmOMADywwnRs=
+github.com/Vico1993/Otto-client v1.3.2/go.mod h1:ZuLiq0gcOf0opUwjxG7fkjKpDNAx5aI63nZnBH6+F00=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
